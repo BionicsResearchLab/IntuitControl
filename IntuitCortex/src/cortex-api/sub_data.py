@@ -228,8 +228,8 @@ def main():
     # Enter your application Client ID and Client Secret below.
     # You can obtain these credentials after registering your App ID with the Cortex SDK for development.
     # For instructions, visit: https://emotiv.gitbook.io/cortex-api#create-a-cortex-app
-    your_app_client_id = 'TIvhTGjjIs1ad4dLlxzjjmZRilX4MD12RzmdS7uE'
-    your_app_client_secret = '4iJFANPyDGyOyiMEimPvVeFqriNWVpGpZvuH6GPuWMYFMbrG0Bv4lBPCJNTv0ik9VE1xikP2HxAsIUiIKhV8ZUnn9GpU3e4GbWgtdgNmIkt5nXiHSZUWrSsauPVpX7o0'
+    your_app_client_id = 'put_your_client_id_here'
+    your_app_client_secret = 'put_your_client_secret_here'
 
     s = Subcribe(your_app_client_id, your_app_client_secret) 
     """
