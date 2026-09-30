@@ -6,7 +6,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 
-from cortex_session import CortexSession
+from IntuitCortex.src.Backend.src.cortex_session import CortexSession
 
 
 session = CortexSession()
