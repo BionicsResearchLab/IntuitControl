@@ -1,26 +1,28 @@
 import sys
 import warnings
-# --- BEGIN: Simplified environment checks ---
-# 1. Check Python version
-if sys.version_info < (2, 7) or (3, 0) <= sys.version_info < (3, 4):
-    print(f"[ERROR] Python 2.7+ or 3.4+ is required. You are using Python {sys.version_info.major}.{sys.version_info.minor}.", file=sys.stderr)
+
+# Environment Checker -- > START
+# Check Python Version
+if sys.version_info < (2, 7) or (3, 0) <= sys.version_info <(3, 4):
+    print(f"[ERROR] python 2.7+ or 3.4+ required, you are using Python {sys.version_info.major}.{sys.version_info.minor}.", file = sys.stderr)
     sys.exit(1)
 
-# 2. Check websocket-client
+# Check Websocket Client
 try:
     import websocket
 except ImportError:
-    print(f"[ERROR] Required library 'websocket-client' is not installed. Please run: {sys.executable} -m pip install websocket-client", file=sys.stderr)
+    warnings.warn(f"websocket not available, please run: {sys.executable} -m pip install websocket-client", file = sys.stderr)
     sys.exit(1)
 
-# 3. Check python-dispatch
+# Check Python Dispatch
 try:
-    from pydispatch import Dispatcher  # needed for class inheritance
+    from pydispatch import Dispatcher
 except ImportError:
-    print(f"[ERROR] Required library 'python-dispatch' is not installed. Please run: {sys.executable} -m pip install python-dispatch", file=sys.stderr)
+    warnings.warn(f"pydispatch not available, please run: {sys.executable} -m pip install python-dispatch", file = sys.stderr)
     sys.exit(1)
-# --- END: Simplified environment checks ---
+# Environment Checker -- > END
 
+# Essential Libraries
 import threading
 import ssl
 import time
@@ -28,59 +30,82 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-# define request id
-QUERY_HEADSET_ID                    =   1
-CONNECT_HEADSET_ID                  =   2
-REQUEST_ACCESS_ID                   =   3
-AUTHORIZE_ID                        =   4
-CREATE_SESSION_ID                   =   5
-SUB_REQUEST_ID                      =   6
-SETUP_PROFILE_ID                    =   7
-QUERY_PROFILE_ID                    =   8
-TRAINING_ID                         =   9
-DISCONNECT_HEADSET_ID               =   10
-CREATE_RECORD_REQUEST_ID            =   11
-STOP_RECORD_REQUEST_ID              =   12
-EXPORT_RECORD_ID                    =   13
-INJECT_MARKER_REQUEST_ID            =   14
-SENSITIVITY_REQUEST_ID              =   15
-MENTAL_COMMAND_ACTIVE_ACTION_ID     =   16
-MENTAL_COMMAND_BRAIN_MAP_ID         =   17
-MENTAL_COMMAND_TRAINING_THRESHOLD   =   18
-SET_MENTAL_COMMAND_ACTIVE_ACTION_ID =   19
-HAS_ACCESS_RIGHT_ID                 =   20
-GET_CURRENT_PROFILE_ID              =   21
-GET_CORTEX_INFO_ID                  =   22
-UPDATE_MARKER_REQUEST_ID            =   23
-UNSUB_REQUEST_ID                    =   24
-REFRESH_HEADSET_LIST_ID             =   25
-QUERY_RECORDS_ID                    =   26
-REQUEST_DOWNLOAD_RECORDS_ID         =   27
-SYNC_WITH_HEADSET_CLOCK_ID          =   28
+# Environment Variables
+try: 
+    from dotenv import load_dotenv
+except ImportError:
+    warnings.warn(f"python-dotenv not available, please run: {sys.executable} -m pip install python-dotenv", file = sys.stderr)
+    sys.exit(1)
 
-#define error_code
-ERR_PROFILE_ACCESS_DENIED = -32046
+# Configuration Python Imports
+from config.paths import ENV_FILE, ROOT_CA_FILE
+from config.requestIDs import EVENT_NAMES
 
-# define warning code
-CORTEX_STOP_ALL_STREAMS = 0
-CORTEX_CLOSE_SESSION = 1
-USER_LOGIN = 2
-USER_LOGOUT = 3
-ACCESS_RIGHT_GRANTED = 9
-ACCESS_RIGHT_REJECTED = 10
-PROFILE_LOADED = 13
-PROFILE_UNLOADED = 14
-CORTEX_AUTO_UNLOAD_PROFILE = 15
-EULA_ACCEPTED = 17
-DISKSPACE_LOW = 19
-DISKSPACE_CRITICAL = 20
-CORTEX_RECORD_POST_PROCESSING_DONE = 30
-HEADSET_CANNOT_CONNECT_TIMEOUT = 102
-HEADSET_DISCONNECTED_TIMEOUT = 103
-HEADSET_CONNECTED = 104
-HEADSET_CANNOT_WORK_WITH_BTLE = 112
-HEADSET_CANNOT_CONNECT_DISABLE_MOTION = 113
-HEADSET_SCANNING_FINISHED = 142
+# Load .env file
+import os
+load_dotenv(ENV_FILE)
+
+# Define Request IDs
+QUERY_HEADSET_ID                    =   os.environ['QUERY_HEADSET_ID']
+CONNECT_HEADSET_ID                  =   os.environ['CONNECT_HEADSET_ID']
+REQUEST_ACCESS_ID                   =   os.environ['REQUEST_ACCESS_ID']
+AUTHORIZE_ID                        =   os.environ['AUTHORIZE_ID']              
+CREATE_SESSION_ID                   =   os.environ['CREATE_SESSION_ID']
+SUB_REQUEST_ID                      =   os.environ['SUB_REQUEST_ID']
+SETUP_PROFILE_ID                    =   os.environ['SETUP_PROFILE_ID']
+QUERY_PROFILE_ID                    =   os.environ['QUERY_PROFILE_ID']
+TRAINING_ID                         =   os.environ['TRAINING_ID']
+DISCONNECT_HEADSET_ID               =   os.environ['DISCONNECT_HEADSET_ID']
+CREATE_RECORD_REQUEST_ID            =   os.environ['CREATE_RECORD_REQUEST_ID']
+STOP_RECORD_REQUEST_ID              =   os.environ['STOP_RECORD_REQUEST_ID']
+EXPORT_RECORD_ID                    =   os.environ['EXPORT_RECORD_ID']
+INJECT_MARKER_REQUEST_ID            =   os.environ['INJECT_MARKER_REQUEST_ID']
+SENSITIVITY_REQUEST_ID              =   os.environ['SENSITIVITY_REQUEST_ID']
+MENTAL_COMMAND_ACTIVE_ACTION_ID     =   os.environ['MENTAL_COMMAND_ACTIVE_ACTION_ID']
+MENTAL_COMMAND_BRAIN_MAP_ID         =   os.environ['MENTAL_COMMAND_BRAIN_MAP_ID']
+MENTAL_COMMAND_TRAINING_THRESHOLD   =   os.environ['MENTAL_COMMAND_TRAINING_THRESHOLD']
+SET_MENTAL_COMMAND_ACTIVE_ACTION_ID =   os.environ['SET_MENTAL_COMMAND_ACTIVE_ACTION_ID']
+HAS_ACCESS_RIGHT_ID                 =   os.environ['HAS_ACCESS_RIGHT_ID']
+GET_CURRENT_PROFILE_ID              =   os.environ['GET_CURRENT_PROFILE_ID']
+GET_CORTEX_INFO_ID                  =   os.environ['GET_CORTEX_INFO_ID']
+UPDATE_MARKER_REQUEST_ID            =   os.environ['UPDATE_MARKER_REQUEST_ID']
+UNSUB_REQUEST_ID                    =   os.environ['UNSUB_REQUEST_ID']
+REFRESH_HEADSET_LIST_ID             =   os.environ['REFRESH_HEADSET_LIST_ID']
+QUERY_RECORDS_ID                    =   os.environ['QUERY_RECORDS_ID']
+REQUEST_DOWNLOAD_RECORDS_ID         =   os.environ['REQUEST_DOWNLOAD_RECORDS_ID']
+SYNC_WITH_HEADSET_CLOCK_ID          =   os.environ['SYNC_WITH_HEADSET_CLOCK_ID']
+GET_USER_LOGIN_ID                   =   os.environ['GET_USER_LOGIN_ID']
+
+# Define error_code
+ERR_PROFILE_ACCESS_DENIED = os.environ['ERR_PROFILE_ACCESS_DENIED']
+
+# Define warning code
+CORTEX_STOP_ALL_STREAMS = os.environ['CORTEX_STOP_ALL_STREAMS']
+CORTEX_CLOSE_SESSION = os.environ['CORTEX_CLOSE_SESSION']
+USER_LOGIN = os.environ['USER_LOGIN']
+USER_LOGOUT = os.environ['USER_LOGOUT'] 
+ACCESS_RIGHT_GRANTED = os.environ['ACCESS_RIGHT_GRANTED']
+ACCESS_RIGHT_REJECTED = os.environ['ACCESS_RIGHT_REJECTED']
+PROFILE_LOADED = os.environ['PROFILE_LOADED']   
+PROFILE_UNLOADED = os.environ['PROFILE_UNLOADED']
+CORTEX_AUTO_UNLOAD_PROFILE = os.environ['CORTEX_AUTO_UNLOAD_PROFILE']
+EULA_ACCEPTED = os.environ['EULA_ACCEPTED']
+DISKSPACE_LOW = os.environ['DISKSPACE_LOW']
+DISKSPACE_CRITICAL = os.environ['DISKSPACE_CRITICAL']
+CORTEX_RECORD_POST_PROCESSING_DONE = os.environ['CORTEX_RECORD_POST_PROCESSING_DONE']
+HEADSET_CANNOT_CONNECT_TIMEOUT = os.environ['HEADSET_CANNOT_CONNECT_TIMEOUT']
+HEADSET_DISCONNECTED_TIMEOUT = os.environ['HEADSET_DISCONNECTED_TIMEOUT']
+HEADSET_CONNECTED = os.environ['HEADSET_CONNECTED']
+HEADSET_CANNOT_WORK_WITH_BTLE = os.environ['HEADSET_CANNOT_WORK_WITH_BTLE']
+HEADSET_CANNOT_CONNECT_DISABLE_MOTION = os.environ['HEADSET_CANNOT_CONNECT_DISABLE_MOTION']
+HEADSET_SCANNING_FINISHED = os.environ['HEADSET_SCANNING_FINISHED']
+
+# Print Environment Variables
+print("Environment Variables:")
+print(f"QUERY_HEADSET_ID: {os.environ['QUERY_HEADSET_ID']}")
+print(f"CONNECT_HEADSET_ID: {os.environ['CONNECT_HEADSET_ID']}")
+print(f"REQUEST_ACCESS_ID: {os.environ['REQUEST_ACCESS_ID']}")
+print(f"AUTHORIZE_ID: {os.environ['AUTHORIZE_ID']}")
 
 class Cortex(Dispatcher):
 
@@ -151,11 +176,11 @@ class Cortex(Dispatcher):
         
         # As default, a Emotiv self-signed certificate is required.
         # If you don't want to use the certificate, please replace by the below line  by sslopt={"cert_reqs": ssl.CERT_NONE}
-        file_dir_path = Path(__file__).resolve().parent
-        parent_dir_path = file_dir_path.parent
+        #file_dir_path = Path(__file__).resolve().parent
+        #parent_dir_path = file_dir_path.parent
         
-        certificate_path = Path(parent_dir_path, 'certificates', 'rootCA.pem')
-        sslopt = {'ca_certs': str(certificate_path), "cert_reqs": ssl.CERT_REQUIRED}
+        #certificate_path = Path(parent_dir_path, 'certificates', 'rootCA.pem')
+        sslopt = {'ca_certs': str(ROOT_CA_FILE), "cert_reqs": ssl.CERT_REQUIRED}
 
         self.websock_thread  = threading.Thread(target=self.ws.run_forever, args=(None, sslopt), name=thread_name)
         self.websock_thread .start()
@@ -598,7 +623,7 @@ class Cortex(Dispatcher):
                 "clientId": self.client_id, 
                 "clientSecret": self.client_secret
             },
-            "id": HAS_ACCESS_RIGHT_ID
+            "id": os.environ['HAS_ACCESS_RIGHT_ID']
         }
         self.ws.send(json.dumps(has_access_request, indent=4))
 
@@ -647,7 +672,7 @@ class Cortex(Dispatcher):
         print('close session --------------------------------')
         close_session_request = { 
             "jsonrpc": "2.0",
-            "id": CREATE_SESSION_ID,
+            "id": os.environ['CREATE_SESSION_ID'],
             "method": "updateSession",
             "params": {
                 "cortexToken": self.auth,
@@ -663,7 +688,7 @@ class Cortex(Dispatcher):
         get_cortex_info_request = {
             "jsonrpc": "2.0",
             "method": "getCortexInfo",
-            "id":GET_CORTEX_INFO_ID
+            "id":os.environ['GET_CORTEX_INFO_ID']
         }
 
         self.ws.send(json.dumps(get_cortex_info_request))
@@ -709,7 +734,7 @@ class Cortex(Dispatcher):
                 "session": self.session_id,
                 "streams": stream
             }, 
-            "id": SUB_REQUEST_ID
+            "id": os.environ['SUB_REQUEST_ID']
         }
         if self.debug:
             print('subscribe request \n', json.dumps(sub_request_json, indent=4))

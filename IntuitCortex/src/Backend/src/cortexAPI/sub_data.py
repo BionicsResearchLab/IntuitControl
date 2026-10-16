@@ -1,6 +1,6 @@
-from IntuitCortex.src.python.cortex import Cortex
+from cortexAPI.cortex import Cortex
 
-class Subcribe():
+class Subscribe():
     """
     A class to subscribe data stream.
 
